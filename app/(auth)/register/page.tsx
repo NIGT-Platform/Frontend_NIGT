@@ -5,7 +5,7 @@ export default function RegisterSelectionPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
       
-      {/* Professional Top Left Back Button */}
+      
       <div className="absolute top-6 left-6 sm:top-8 sm:left-8">
         <Link href="/" className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-md hover:bg-slate-50 hover:text-[var(--color-primary)] shadow-sm transition-all group">
           <ArrowLeft className="mr-2 h-4 w-4 text-slate-400 group-hover:text-[var(--color-primary)] transition-colors" /> 
