@@ -38,9 +38,11 @@ export default function LoginPage() {
       setApiError('');
       const response = await authService.login(data);
       
-      // Store token
+      // Store token and user data
       if (response.accessToken) {
         localStorage.setItem('accessToken', response.accessToken);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        localStorage.setItem('userRole', response.user?.role || '');
       }
       
       // Redirect to a placeholder dashboard (we will build this later)

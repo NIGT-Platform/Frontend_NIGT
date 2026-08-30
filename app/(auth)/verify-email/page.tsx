@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
@@ -12,6 +12,7 @@ function VerifyEmailContent() {
   const token = searchParams.get('token');
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState('');
+  const hasAttempted = useRef(false);
 
   useEffect(() => {
     if (!token) {
@@ -19,6 +20,9 @@ function VerifyEmailContent() {
       setErrorMessage('Verification token is missing from the URL.');
       return;
     }
+
+    if (hasAttempted.current) return;
+    hasAttempted.current = true;
 
     const verifyToken = async () => {
       try {
