@@ -13,7 +13,7 @@ export default function DashboardRedirect() {
     } else if (role === 'DRIVER') {
       router.push('/profile');
     } else if (role === 'VEHICLE_OWNER') {
-      router.push('/profile');
+      router.push('/owner/vehicles');
     } else {
       router.push('/login');
     }

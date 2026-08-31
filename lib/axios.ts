@@ -13,9 +13,12 @@ export const axiosInstance = axios.create({
 // Add a request interceptor to inject the token
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = Cookies.get('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Only attempt to read localStorage if we are in the browser
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },

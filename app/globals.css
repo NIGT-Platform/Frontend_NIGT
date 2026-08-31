@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #0F1f38;     /* Navy Blue (from logo text) */
-  --color-primary-hover: #172B4D; 
-  --color-secondary: #D49A28;   /* Gold/Yellow (from logo swoosh) */
-  --color-secondary-hover: #B8821B; 
+  --color-primary: #33A3DC;       /* Sky Blue */
+  --color-primary-hover: #2B8BBF; /* Darker Sky Blue */
+  --color-secondary: #74C24E;     /* Leaf Green */
+  --color-secondary-hover: #5CA33B; /* Darker Leaf Green */
   --color-success: #10B981;     
   --color-danger: #EF4444;      
   --color-background: #F8FAFC;  
