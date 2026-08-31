@@ -4,8 +4,6 @@ import { RoleGuard } from '@/components/auth/RoleGuard';
 import { CheckCircle, XCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
-// We would normally fetch this via a service
-import { api } from '@/lib/utils'; // wait we don't have api in lib/utils, let's just use fetch
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
