@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Users, LayoutDashboard, UserCircle, LogOut, ShieldCheck, Menu, X, Truck, FileEdit } from 'lucide-react';
+import { Users, LayoutDashboard, UserCircle, LogOut, ShieldCheck, Menu, X, Truck, FileEdit, Key } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -28,6 +28,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Profile Requests', href: '/admin/profile-requests', icon: FileEdit, show: role === 'ADMIN' },
     // Vehicle Owner nav items
     { name: 'My Vehicles', href: '/owner/vehicles', icon: Truck, show: role === 'VEHICLE_OWNER' },
+    // Driver nav items
+    { name: 'My Assignment', href: '/driver/my-assignment', icon: Key, show: role === 'DRIVER' },
     // Common
     { name: 'Profile', href: '/profile', icon: UserCircle, show: true },
   ];
