@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Users, LayoutDashboard, UserCircle, LogOut, ShieldCheck, Menu, X, Truck, FileEdit, Key } from 'lucide-react';
+import { Users, LayoutDashboard, UserCircle, LogOut, ShieldCheck, Menu, X, Truck, FileEdit, Key, Package, Compass } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -25,11 +25,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     // Admin nav items
     { name: 'Users', href: '/admin/users', icon: Users, show: role === 'ADMIN' },
     { name: 'Vehicles', href: '/admin/vehicles', icon: Truck, show: role === 'ADMIN' },
+    { name: 'Jobs', href: '/admin/jobs', icon: Package, show: role === 'ADMIN' },
+    { name: 'Trips', href: '/admin/trips', icon: Compass, show: role === 'ADMIN' },
     { name: 'Profile Requests', href: '/admin/profile-requests', icon: FileEdit, show: role === 'ADMIN' },
     // Vehicle Owner nav items
     { name: 'My Vehicles', href: '/owner/vehicles', icon: Truck, show: role === 'VEHICLE_OWNER' },
+    { name: 'Jobs', href: '/owner/jobs', icon: Package, show: role === 'VEHICLE_OWNER' },
+    { name: 'Trips', href: '/owner/trips', icon: Compass, show: role === 'VEHICLE_OWNER' },
     // Driver nav items
     { name: 'My Assignment', href: '/driver/my-assignment', icon: Key, show: role === 'DRIVER' },
+    { name: 'My Trips', href: '/driver/trips', icon: Compass, show: role === 'DRIVER' },
     // Common
     { name: 'Profile', href: '/profile', icon: UserCircle, show: true },
   ];
