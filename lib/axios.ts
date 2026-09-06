@@ -25,12 +25,46 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Add a response interceptor to handle errors globally (e.g. 401 Unauthorized)
+// Add a response interceptor to handle token refresh on 401 Unauthorized
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // We can handle token refresh logic here in the future if needed
-    // For now, if 401, we just return the error and the component can redirect to login
+    const originalRequest = error.config;
+
+    // Avoid infinite loop if refresh endpoint itself returned 401
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/refresh-token') &&
+      !originalRequest.url?.includes('/auth/login') &&
+      typeof window !== 'undefined'
+    ) {
+      originalRequest._retry = true;
+      const refreshToken = localStorage.getItem('refreshToken');
+
+      if (refreshToken) {
+        try {
+          const res = await axios.post(`${API_URL}/auth/refresh-token`, { refreshToken });
+          if (res.data?.accessToken) {
+            localStorage.setItem('accessToken', res.data.accessToken);
+            if (res.data?.refreshToken) {
+              localStorage.setItem('refreshToken', res.data.refreshToken);
+            }
+            originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
+            return axiosInstance(originalRequest);
+          }
+        } catch (refreshErr) {
+          // Refresh token also invalid/expired -> clear storage and redirect
+          localStorage.clear();
+          window.location.href = '/login';
+          return Promise.reject(refreshErr);
+        }
+      } else {
+        localStorage.clear();
+        window.location.href = '/login';
+      }
+    }
+
     return Promise.reject(error);
   }
 );

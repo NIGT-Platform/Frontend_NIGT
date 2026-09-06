@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Truck, FileText, CheckCircle, Clock, XCircle, AlertTriangle, Upload, Loader2, Edit2, Save, X, UserPlus, UserMinus, History, User } from 'lucide-react';
 import Link from 'next/link';
-import { vehicleService, Vehicle, DocumentType, ApprovalStatus } from '@/services/vehicle.service';
+import { vehicleService, Vehicle, DocumentType, ApprovalStatus, CapacityUnit } from '@/services/vehicle.service';
 import { assignmentService, VehicleAssignment } from '@/services/assignment.service';
 import { UserProfile } from '@/services/profile.service';
 
@@ -28,7 +28,12 @@ export default function VehicleDetailPage() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState<DocumentType | null>(null);
-  const [editForm, setEditForm] = useState({ brand: '', model: '', capacity: 0, capacityUnit: 'TON' as const });
+  const [editForm, setEditForm] = useState<{ brand: string; model: string; capacity: number; capacityUnit: CapacityUnit }>({
+    brand: '',
+    model: '',
+    capacity: 0,
+    capacityUnit: 'TON',
+  });
 
   // Assignment State
   const [assignments, setAssignments] = useState<VehicleAssignment[]>([]);

@@ -23,7 +23,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, show: true },
     // Admin nav items
-    { name: 'Pending Users', href: '/admin/users', icon: Users, show: role === 'ADMIN' },
+    { name: 'Users', href: '/admin/users', icon: Users, show: role === 'ADMIN' },
     { name: 'Vehicles', href: '/admin/vehicles', icon: Truck, show: role === 'ADMIN' },
     { name: 'Profile Requests', href: '/admin/profile-requests', icon: FileEdit, show: role === 'ADMIN' },
     // Vehicle Owner nav items

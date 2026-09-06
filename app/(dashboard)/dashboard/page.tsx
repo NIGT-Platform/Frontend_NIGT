@@ -59,7 +59,26 @@ export default function AdminDashboard() {
   const [role, setRole] = useState('');
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [userName, setUserName] = useState('Admin');
+
+  const fetchStats = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axiosInstance.get('/admin/stats');
+      setStats(res.data.stats);
+    } catch (err: any) {
+      console.error('Failed to load dashboard stats:', err);
+      if (err?.response?.status === 401) {
+        setError('Your session has expired. Please log in again.');
+      } else {
+        setError('Unable to load dashboard statistics. Please check your connection and try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const userRole = localStorage.getItem('userRole');
@@ -68,10 +87,7 @@ export default function AdminDashboard() {
     if (user?.firstName) setUserName(user.firstName);
 
     if (userRole === 'ADMIN') {
-      axiosInstance.get('/admin/stats')
-        .then(res => setStats(res.data.stats))
-        .catch(() => {})
-        .finally(() => setLoading(false));
+      fetchStats();
     } else {
       // Non-admin users get redirected
       if (userRole === 'DRIVER') router.push('/driver/my-assignment');
@@ -80,9 +96,10 @@ export default function AdminDashboard() {
     }
   }, [router]);
 
-  if (loading || role !== 'ADMIN') return (
-    <div className="flex items-center justify-center h-full">
+  if (loading && !stats) return (
+    <div className="flex flex-col items-center justify-center h-64 gap-3">
       <Loader2 className="animate-spin h-8 w-8 text-[var(--color-primary)]" />
+      <p className="text-sm text-slate-500">Loading dashboard...</p>
     </div>
   );
 
@@ -105,6 +122,29 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center space-y-3">
+          <p className="text-red-700 font-medium text-sm">{error}</p>
+          <div className="flex justify-center gap-3">
+            <button
+              onClick={fetchStats}
+              className="px-4 py-2 bg-[var(--color-primary)] text-white text-xs font-semibold rounded-lg hover:bg-opacity-90 transition-colors"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => {
+                localStorage.clear();
+                router.push('/login');
+              }}
+              className="px-4 py-2 bg-white border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Log In Again
+            </button>
+          </div>
+        </div>
+      )}
+
       {stats && (
         <>
           {/* Primary Stats */}
@@ -117,7 +157,7 @@ export default function AdminDashboard() {
                 subtitle={`${stats.users.owners} owners · ${stats.users.drivers} drivers`}
                 icon={Users}
                 color="bg-[#33A3DC] text-[#33A3DC]"
-                href="/admin/users"
+                href="/admin/users?tab=all"
               />
               <StatCard
                 title="Total Vehicles"
@@ -141,6 +181,7 @@ export default function AdminDashboard() {
                 icon={Clock}
                 color="bg-amber-500 text-amber-500"
                 alert
+                href="/admin/users?tab=pending"
               />
             </div>
           </div>
@@ -155,7 +196,7 @@ export default function AdminDashboard() {
                 subtitle="Awaiting account approval"
                 icon={Users}
                 color="bg-amber-400 text-amber-400"
-                href="/admin/users"
+                href="/admin/users?tab=pending"
                 alert
               />
               <StatCard

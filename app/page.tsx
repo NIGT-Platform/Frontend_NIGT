@@ -57,11 +57,12 @@ function HeroSlider() {
         >
           {(slide as any).isLogo ? (
             // Logo slide — white background
-            <div className="w-full h-full bg-white flex items-center justify-center">
+            <div className="relative w-full h-full bg-white flex items-center justify-center">
               <Image
                 src={slide.src}
                 alt={slide.caption}
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-contain p-8"
               />
             </div>
@@ -70,6 +71,7 @@ function HeroSlider() {
               src={slide.src}
               alt={slide.caption}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
               priority={i === 0}
             />
