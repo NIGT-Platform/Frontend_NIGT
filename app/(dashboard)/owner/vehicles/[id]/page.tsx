@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Truck, FileText, CheckCircle, Clock, XCircle, AlertTriangle, Upload, Loader2, Edit2, Save, X, UserPlus, UserMinus, History, User } from 'lucide-react';
+import { ArrowLeft, Truck, FileText, CheckCircle, Clock, XCircle, AlertTriangle, Upload, Loader2, Edit2, Save, X, UserPlus, UserMinus, History, User, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { vehicleService, Vehicle, DocumentType, ApprovalStatus, CapacityUnit } from '@/services/vehicle.service';
 import { assignmentService, VehicleAssignment } from '@/services/assignment.service';
 import { UserProfile } from '@/services/profile.service';
+import { getFileUrl } from '@/lib/axios';
 
 const statusConfig: Record<ApprovalStatus, { label: string; color: string; icon: React.ElementType }> = {
   PENDING: { label: 'Pending Review', color: 'bg-amber-100 text-amber-700', icon: Clock },
@@ -24,7 +25,9 @@ export default function VehicleDetailPage() {
   const { id } = useParams() as { id: string };
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [fetchError, setFetchError] = useState('');
+  const [actionError, setActionError] = useState('');
+  const [actionSuccess, setActionSuccess] = useState('');
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState<DocumentType | null>(null);
@@ -44,6 +47,7 @@ export default function VehicleDetailPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      setFetchError('');
       const [vehRes, assignRes, driversRes] = await Promise.all([
         vehicleService.getVehicleById(id),
         assignmentService.getVehicleAssignments(id),
@@ -59,7 +63,7 @@ export default function VehicleDetailPage() {
       setAssignments(assignRes.assignments);
       setAvailableDrivers(driversRes.drivers);
     } catch (err) {
-      setError('Vehicle not found or access denied.');
+      setFetchError('Vehicle not found or access denied.');
     } finally {
       setLoading(false);
     }
@@ -70,12 +74,15 @@ export default function VehicleDetailPage() {
   const handleSave = async () => {
     if (!vehicle) return;
     setSaving(true);
+    setActionError('');
+    setActionSuccess('');
     try {
       const res = await vehicleService.updateVehicle(id, editForm);
       setVehicle(res.vehicle);
       setEditing(false);
+      setActionSuccess('Vehicle details updated successfully.');
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to update vehicle.');
+      setActionError(err?.response?.data?.message || 'Failed to update vehicle.');
     } finally {
       setSaving(false);
     }
@@ -83,14 +90,17 @@ export default function VehicleDetailPage() {
 
   const handleUploadDocument = async (docType: DocumentType, file: File) => {
     setUploadingDoc(docType);
+    setActionError('');
+    setActionSuccess('');
     const formData = new FormData();
     formData.append('documentType', docType);
     formData.append('document', file);
     try {
       const res = await vehicleService.uploadDocument(id, formData);
       setVehicle(prev => prev ? { ...prev, documents: [...prev.documents, res.document] } : prev);
+      setActionSuccess('Document uploaded successfully.');
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to upload document.');
+      setActionError(err?.response?.data?.message || 'Failed to upload document.');
     } finally {
       setUploadingDoc(null);
     }
@@ -99,13 +109,15 @@ export default function VehicleDetailPage() {
   const handleAssignDriver = async () => {
     if (!selectedDriverId) return;
     setAssigning(true);
-    setError('');
+    setActionError('');
+    setActionSuccess('');
     try {
       await assignmentService.assignDriver(id, selectedDriverId);
       await fetchData(); // Refresh data to get new assignments and available drivers
       setSelectedDriverId('');
+      setActionSuccess('Driver assigned successfully to this vehicle.');
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to assign driver.');
+      setActionError(err?.response?.data?.message || 'Failed to assign driver.');
     } finally {
       setAssigning(false);
     }
@@ -114,12 +126,14 @@ export default function VehicleDetailPage() {
   const handleUnassignDriver = async (driverId: string) => {
     if (!confirm('Are you sure you want to unassign this driver?')) return;
     setAssigning(true);
-    setError('');
+    setActionError('');
+    setActionSuccess('');
     try {
       await assignmentService.unassignDriver(id, driverId);
       await fetchData();
+      setActionSuccess('Driver unassigned successfully.');
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to unassign driver.');
+      setActionError(err?.response?.data?.message || 'Failed to unassign driver.');
     } finally {
       setAssigning(false);
     }
@@ -131,9 +145,9 @@ export default function VehicleDetailPage() {
     </div>
   );
 
-  if (error || !vehicle) return (
+  if (fetchError || !vehicle) return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm">{error || 'Vehicle not found.'}</div>
+      <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm">{fetchError || 'Vehicle not found.'}</div>
       <Link href="/owner/vehicles" className="mt-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
         <ArrowLeft className="h-4 w-4" /> Back to My Vehicles
       </Link>
@@ -146,6 +160,23 @@ export default function VehicleDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+      {/* Action Messages */}
+      {actionError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm flex justify-between items-center">
+          <span>{actionError}</span>
+          <button onClick={() => setActionError('')} className="text-red-500 hover:text-red-700 p-1">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+      {actionSuccess && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg p-4 text-sm flex justify-between items-center">
+          <span>{actionSuccess}</span>
+          <button onClick={() => setActionSuccess('')} className="text-emerald-500 hover:text-emerald-700 p-1">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
       {/* Header */}
       <div>
         <Link href="/owner/vehicles" className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 mb-4 transition-colors">
@@ -263,7 +294,17 @@ export default function VehicleDetailPage() {
                     </div>
                   </div>
                   {uploaded ? (
-                    <CheckCircle className="h-5 w-5 text-emerald-500" />
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={getFileUrl(uploaded.documentUrl)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 px-2 py-1 bg-blue-50 border border-blue-100 rounded hover:bg-blue-100 transition-colors"
+                      >
+                        <Eye className="h-3 w-3" /> View
+                      </a>
+                      <CheckCircle className="h-5 w-5 text-emerald-500" />
+                    </div>
                   ) : (
                     <label className="cursor-pointer">
                       <input type="file" accept=".jpg,.jpeg,.png,.pdf" className="hidden"

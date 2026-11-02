@@ -5,6 +5,7 @@ import {
   CheckCircle, Clock, XCircle, ShieldCheck, Mail, Phone, Calendar
 } from 'lucide-react';
 import { profileService, UserProfile, ProfileChangeRequest } from '@/services/profile.service';
+import { getFileUrl } from '@/lib/axios';
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: 'Administrator',
@@ -164,7 +165,7 @@ export default function ProfilePage() {
               <div className="h-24 w-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-[var(--color-primary)] flex items-center justify-center">
                 {user.profileImageUrl ? (
                   <img
-                    src={`http://localhost:5000${user.profileImageUrl}`}
+                    src={getFileUrl(user.profileImageUrl)}
                     alt="Profile"
                     className="h-full w-full object-cover"
                   />

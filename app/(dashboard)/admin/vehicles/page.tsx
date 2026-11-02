@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { CheckCircle, XCircle, AlertTriangle, Clock, Truck, ChevronDown, ChevronUp, Loader2, Eye } from 'lucide-react';
 import { adminVehicleService } from '@/services/admin.vehicle.service';
 import { Vehicle, ApprovalStatus } from '@/services/vehicle.service';
+import { getFileUrl } from '@/lib/axios';
 
 const statusConfig: Record<ApprovalStatus, { label: string; color: string; icon: React.ElementType }> = {
   PENDING: { label: 'Pending', color: 'bg-amber-100 text-amber-700', icon: Clock },
@@ -133,7 +134,7 @@ export default function AdminVehiclesPage() {
                       ) : (
                         <div className="flex flex-wrap gap-2">
                           {vehicle.documents.map(doc => (
-                            <a key={doc.id} href={`http://localhost:5000${doc.documentUrl}`} target="_blank" rel="noreferrer"
+                            <a key={doc.id} href={getFileUrl(doc.documentUrl)} target="_blank" rel="noreferrer"
                               className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-lg transition-colors">
                               <Eye className="h-3.5 w-3.5" />
                               {doc.documentType.replace(/_/g, ' ')}

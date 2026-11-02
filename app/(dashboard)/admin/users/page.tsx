@@ -7,7 +7,7 @@ import {
   User, Mail, Phone, Calendar, FileText, ShieldCheck, Clock,
   Search, Filter, AlertTriangle, UserCheck, ShieldAlert
 } from 'lucide-react';
-import { axiosInstance } from '@/lib/axios';
+import { axiosInstance, getFileUrl } from '@/lib/axios';
 
 interface DriverProfile {
   licenseNumber: string;
@@ -355,7 +355,7 @@ function AdminUsersContent() {
                                       <FileText className="h-4 w-4 text-violet-500 flex-shrink-0" />
                                       <span className="text-slate-500 w-32">Document</span>
                                       <a
-                                        href={`http://localhost:5000${user.driverProfile.licenseDocumentUrl}`}
+                                        href={getFileUrl(user.driverProfile.licenseDocumentUrl)}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-[var(--color-primary)] font-semibold hover:underline"
