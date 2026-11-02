@@ -1,18 +1,39 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+export const getApiUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
+  if (typeof window !== 'undefined') {
+    return `http://${window.location.hostname}:5000/api`;
+  }
+  return 'http://localhost:5000/api';
+};
+
+export const getFileUrl = (filePath: string | null | undefined): string => {
+  if (!filePath) return '';
+  if (filePath.startsWith('http://') || filePath.startsWith('https://')) return filePath;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL
+    ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/?$/, '')
+    : typeof window !== 'undefined'
+      ? `http://${window.location.hostname}:5000`
+      : 'http://localhost:5000';
+  const cleanPath = filePath.startsWith('/') ? filePath : `/${filePath}`;
+  return `${baseUrl}${cleanPath}`;
+};
 
 export const axiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: getApiUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Add a request interceptor to inject the token
+// Add a request interceptor to inject the token and dynamically update baseURL for mobile devices
 axiosInstance.interceptors.request.use(
   (config) => {
+    if (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_API_URL) {
+      config.baseURL = `http://${window.location.hostname}:5000/api`;
+    }
     // Only attempt to read localStorage if we are in the browser
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('accessToken');
@@ -44,7 +65,7 @@ axiosInstance.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          const res = await axios.post(`${API_URL}/auth/refresh-token`, { refreshToken });
+          const res = await axios.post(`${getApiUrl()}/auth/refresh-token`, { refreshToken });
           if (res.data?.accessToken) {
             localStorage.setItem('accessToken', res.data.accessToken);
             if (res.data?.refreshToken) {
