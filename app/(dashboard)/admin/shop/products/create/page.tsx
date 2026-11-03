@@ -2,15 +2,21 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, AlertCircle, Save } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Save, Plus, Check } from 'lucide-react';
 import { RoleGuard } from '@/components/auth/RoleGuard';
-import { adminCreateProduct, adminGetCategories, ProductCategory } from '@/services/shop.service';
+import { adminCreateProduct, adminGetCategories, adminCreateCategory, ProductCategory } from '@/services/shop.service';
 
 export default function CreateProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Inline category creation state
+  const [showNewCat, setShowNewCat] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [catCreating, setCatCreating] = useState(false);
+  const [catError, setCatError] = useState('');
 
   const [form, setForm] = useState({
     categoryId: '',
@@ -23,7 +29,14 @@ export default function CreateProductPage() {
   });
 
   useEffect(() => {
-    adminGetCategories().then(setCategories).catch(() => setError('Failed to load categories.'));
+    adminGetCategories()
+      .then((cats) => {
+        setCategories(cats);
+        if (cats.length === 0) {
+          setShowNewCat(true);
+        }
+      })
+      .catch(() => setError('Failed to load categories.'));
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -35,12 +48,32 @@ export default function CreateProductPage() {
     }
   };
 
+  const handleCreateCategory = async () => {
+    if (!newCatName.trim()) return;
+    setCatCreating(true);
+    setCatError('');
+    try {
+      const slug = newCatName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const created = await adminCreateCategory(newCatName.trim(), slug);
+      setCategories((prev) => [...prev, created]);
+      setForm((f) => ({ ...f, categoryId: created.id }));
+      setNewCatName('');
+      setShowNewCat(false);
+    } catch (err: any) {
+      setCatError(err?.response?.data?.message || 'Failed to create category.');
+    } finally {
+      setCatCreating(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.categoryId || !form.name || !form.price || !form.stockQty) {
-      setError('Please fill in all required fields.'); return;
+      setError('Please fill in all required fields including selecting a category.');
+      return;
     }
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
       const product = await adminCreateProduct({
         categoryId: form.categoryId,
@@ -54,7 +87,9 @@ export default function CreateProductPage() {
       router.push(`/admin/shop/products/${product.id}/edit`);
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Failed to create product.');
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,22 +114,90 @@ export default function CreateProductPage() {
         )}
 
         <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+          {/* Category Selector & Quick Creator */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Category <span className="text-red-500">*</span></label>
-            <select
-              name="categoryId"
-              value={form.categoryId}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-            >
-              <option value="">Select a category</option>
-              {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-slate-700">
+                Category <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowNewCat(!showNewCat)}
+                  className="text-xs text-[var(--color-primary)] hover:underline font-medium flex items-center gap-1"
+                >
+                  <Plus className="h-3 w-3" /> {showNewCat ? 'Hide' : '+ New Category'}
+                </button>
+                <span className="text-slate-300">|</span>
+                <Link
+                  href="/admin/shop/categories"
+                  className="text-xs text-slate-500 hover:text-slate-700 hover:underline"
+                  target="_blank"
+                >
+                  Manage Categories
+                </Link>
+              </div>
+            </div>
+
+            {/* Quick Category Add Input */}
+            {showNewCat && (
+              <div className="mb-3 p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                <p className="text-xs font-semibold text-slate-700">Create New Category:</p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newCatName}
+                    onChange={(e) => setNewCatName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleCreateCategory();
+                      }
+                    }}
+                    placeholder="e.g. Tires & Wheels, Batteries, Brakes..."
+                    className="flex-1 px-3 py-1.5 rounded-md border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white"
+                  />
+                  <button
+                    type="button"
+                    disabled={catCreating || !newCatName.trim()}
+                    onClick={handleCreateCategory}
+                    className="px-3 py-1.5 bg-[var(--color-primary)] text-white text-xs font-medium rounded-md hover:opacity-90 disabled:opacity-50 flex items-center gap-1"
+                  >
+                    {catCreating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                    Create
+                  </button>
+                </div>
+                {catError && <p className="text-xs text-red-600">{catError}</p>}
+              </div>
+            )}
+
+            {categories.length === 0 ? (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 space-y-1.5">
+                <p className="font-semibold">⚠️ No categories found in database.</p>
+                <p>Type a category name above and click <strong>Create</strong> to add your first category.</p>
+              </div>
+            ) : (
+              <select
+                name="categoryId"
+                value={form.categoryId}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              >
+                <option value="">Select a category</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Product Name <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Product Name <span className="text-red-500">*</span>
+            </label>
             <input
               name="name"
               value={form.name}
@@ -106,7 +209,9 @@ export default function CreateProductPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Description <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Description <span className="text-red-500">*</span>
+            </label>
             <textarea
               name="description"
               value={form.description}
@@ -120,7 +225,9 @@ export default function CreateProductPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Price (ETB) <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Price (ETB) <span className="text-red-500">*</span>
+              </label>
               <input
                 name="price"
                 type="number"
@@ -134,7 +241,9 @@ export default function CreateProductPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Stock Quantity <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Stock Quantity <span className="text-red-500">*</span>
+              </label>
               <input
                 name="stockQty"
                 type="number"
@@ -168,12 +277,17 @@ export default function CreateProductPage() {
               onChange={handleChange}
               className="h-4 w-4 rounded border-slate-300 text-[var(--color-primary)]"
             />
-            <label htmlFor="isActive" className="text-sm text-slate-700">Active (visible in store)</label>
+            <label htmlFor="isActive" className="text-sm text-slate-700">
+              Active (visible in store)
+            </label>
           </div>
 
           <div className="flex gap-3 pt-2 border-t border-slate-100">
             <Link href="/admin/shop/products" className="flex-1">
-              <button type="button" className="w-full px-4 py-2.5 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50">
+              <button
+                type="button"
+                className="w-full px-4 py-2.5 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50"
+              >
                 Cancel
               </button>
             </Link>
