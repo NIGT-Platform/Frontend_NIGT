@@ -554,7 +554,7 @@ export default function LandingPage() {
             <h4 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">{t.contact}</h4>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
-                <span className="text-[#74C24E]">✉</span> support@nigt-platform.com
+                <span className="text-[#74C24E]">✉</span> hadguab77@gmail.com
               </li>
               <li className="flex items-center gap-2">
                 <span className="text-[#74C24E]">☏</span> +224 624 37 65 53
