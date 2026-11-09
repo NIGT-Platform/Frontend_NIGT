@@ -6,6 +6,7 @@ import { ShieldCheck, MapPin, BarChart3, Users, ChevronRight, Truck, ShoppingBag
 import { Button } from '@/components/ui/Button';
 import { getFileUrl } from '@/lib/axios';
 import { getProducts, Product } from '@/services/shop.service';
+import { getPublicHeroSlides, HeroSlide } from '@/services/heroSlide.service';
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { WhatsAppInquiryButton, WhatsAppFloatingWidget, WhatsAppIcon, openWhatsAppChat } from '@/components/ui/WhatsAppButton';
@@ -14,8 +15,21 @@ function HeroSlider() {
   const { t } = useLanguage();
   const [current, setCurrent] = useState(0);
   const [animating, setAnimating] = useState(false);
+  const [customSlides, setCustomSlides] = useState<HeroSlide[]>([]);
 
-  const slides = [
+  useEffect(() => {
+    getPublicHeroSlides()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setCustomSlides(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Hero slides fetch warning:', err);
+      });
+  }, []);
+
+  const defaultSlides = [
     {
       src: '/hero1.jpg',
       caption: t.slide1Caption,
@@ -39,7 +53,17 @@ function HeroSlider() {
     },
   ];
 
+  const slides = customSlides.length > 0
+    ? customSlides.map((s) => ({
+        src: getFileUrl(s.imageUrl),
+        caption: s.caption || t.slide1Caption,
+        sub: s.subCaption || t.slide1Sub,
+        isLogo: false,
+      }))
+    : defaultSlides;
+
   useEffect(() => {
+    if (slides.length <= 1) return;
     const interval = setInterval(() => {
       setAnimating(true);
       setTimeout(() => {
@@ -61,22 +85,20 @@ function HeroSlider() {
         >
           {(slide as any).isLogo ? (
             <div className="relative w-full h-full bg-white flex items-center justify-center">
-              <Image
+              <img
                 src={slide.src}
                 alt={slide.caption}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-contain p-8"
+                className="w-full h-full object-contain p-8"
               />
             </div>
           ) : (
-            <Image
+            <img
               src={slide.src}
               alt={slide.caption}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-              priority={i === 0}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/hero1.jpg';
+              }}
             />
           )}
           {!(slide as any).isLogo && (

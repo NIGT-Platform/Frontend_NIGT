@@ -16,6 +16,12 @@ export const authService = {
     return response.data;
   },
 
+  // Buyer / Customer Registration
+  registerBuyer: async (data: any): Promise<AuthResponse> => {
+    const response = await axiosInstance.post('/auth/register/buyer', data);
+    return response.data;
+  },
+
   // Login
   login: async (data: any): Promise<AuthResponse> => {
     const response = await axiosInstance.post('/auth/login', data);

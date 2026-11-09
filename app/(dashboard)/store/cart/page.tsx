@@ -13,6 +13,7 @@ export default function CartPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   const fetchCart = async () => {
     setLoading(true);
@@ -21,7 +22,16 @@ export default function CartPage() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchCart(); }, []);
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (!token) {
+      setIsLoggedIn(false);
+      setLoading(false);
+    } else {
+      setIsLoggedIn(true);
+      fetchCart();
+    }
+  }, []);
 
   const handleQuantityChange = async (itemId: string, newQty: number) => {
     if (newQty < 0) return;
@@ -74,7 +84,29 @@ export default function CartPage() {
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm">{error}</div>
       )}
 
-      {loading ? (
+      {!isLoggedIn ? (
+        <div className="bg-white rounded-2xl border border-slate-200 text-center py-16 px-6 shadow-sm max-w-lg mx-auto space-y-4">
+          <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto text-emerald-600 shadow-sm border border-emerald-100">
+            <ShoppingCart className="h-8 w-8" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-800">Customer Cart</h2>
+          <p className="text-sm text-slate-500 max-w-sm mx-auto">
+            Please register as a customer or log in to view items in your cart, track pricing, and complete your order.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            <Link href="/register/buyer?redirect=/store/cart">
+              <button className="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow-sm transition-colors">
+                Register as Buyer
+              </button>
+            </Link>
+            <Link href="/login?redirect=/store/cart">
+              <button className="w-full sm:w-auto px-6 py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-sm transition-colors">
+                Log In
+              </button>
+            </Link>
+          </div>
+        </div>
+      ) : loading ? (
         <div className="flex justify-center items-center h-48">
           <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary)]" />
         </div>

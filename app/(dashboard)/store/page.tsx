@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, ShoppingCart, Package, Loader2, AlertCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Search, ShoppingCart, Package, Loader2, AlertCircle, ShoppingBag } from 'lucide-react';
 import { getFileUrl } from '@/lib/axios';
 import { getCategories, getProducts, addToCart, Product, ProductCategory } from '@/services/shop.service';
 import { useLanguage } from '@/context/LanguageContext';
@@ -9,6 +10,7 @@ import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { WhatsAppInquiryButton, WhatsAppFloatingWidget } from '@/components/ui/WhatsAppButton';
 
 export default function StorePage() {
+  const router = useRouter();
   const { t } = useLanguage();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
@@ -19,6 +21,11 @@ export default function StorePage() {
   const [cartCount, setCartCount] = useState(0);
   const [addingId, setAddingId] = useState<string | null>(null);
   const [addedId, setAddedId] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(typeof window !== 'undefined' && !!localStorage.getItem('accessToken'));
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -39,6 +46,11 @@ export default function StorePage() {
 
   const handleAddToCart = async (product: Product) => {
     if (product.stockQty === 0) return;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (!token) {
+      router.push(`/register/buyer?redirect=${encodeURIComponent('/store')}`);
+      return;
+    }
     setAddingId(product.id);
     try {
       await addToCart(product.id, 1);
@@ -94,6 +106,33 @@ export default function StorePage() {
           </Link>
         </div>
       </div>
+
+      {/* Guest Buyer Registration Banner */}
+      {!isLoggedIn && (
+        <div className="bg-gradient-to-r from-emerald-600 to-[#1a3f5c] text-white rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-white/10 rounded-xl backdrop-blur-sm">
+              <ShoppingBag className="h-6 w-6 text-emerald-300" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm sm:text-base">Buying parts, oils, or tires for your truck?</h3>
+              <p className="text-xs text-white/80">Register as a Customer / Buyer in 30 seconds for instant online ordering and dispatch.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Link href="/register/buyer?redirect=/store" className="flex-1 sm:flex-none">
+              <button className="w-full px-4 py-2 bg-white text-emerald-800 rounded-xl text-xs font-bold hover:bg-slate-100 transition-colors shadow-sm whitespace-nowrap">
+                Register as Buyer
+              </button>
+            </Link>
+            <Link href="/login?redirect=/store" className="flex-1 sm:flex-none">
+              <button className="w-full px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold transition-colors border border-white/20 whitespace-nowrap">
+                Sign In
+              </button>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm">

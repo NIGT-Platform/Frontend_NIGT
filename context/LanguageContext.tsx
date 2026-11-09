@@ -107,6 +107,7 @@ export interface Translations {
   navProducts: string;
   navCategories: string;
   navShopOrders: string;
+  navHeroSlides: string;
   navMyVehicles: string;
   navMyAssignment: string;
   navMyTrips: string;
@@ -214,6 +215,8 @@ export interface Translations {
   asOwnerDesc: string;
   asDriver: string;
   asDriverDesc: string;
+  asBuyer: string;
+  asBuyerDesc: string;
   alreadyHaveAccount: string;
   loginHere: string;
 
@@ -367,6 +370,7 @@ export const translations: Record<Language, Translations> = {
     navProducts: 'Products',
     navCategories: 'Categories',
     navShopOrders: 'Shop Orders',
+    navHeroSlides: 'Landing Hero Slides',
     navMyVehicles: 'My Vehicles',
     navMyAssignment: 'My Assignment',
     navMyTrips: 'My Trips',
@@ -486,6 +490,8 @@ export const translations: Record<Language, Translations> = {
     asOwnerDesc: 'Register your fleet, assign drivers, and track your vehicle earnings.',
     asDriver: 'Professional Driver',
     asDriverDesc: 'Manage your trips, report delivery statuses, and stay connected.',
+    asBuyer: 'Shop Customer / Buyer',
+    asBuyerDesc: 'Buy heavy truck parts, motor oils, and accessories with instant order dispatch.',
     alreadyHaveAccount: 'Already have an account?',
     loginHere: 'Log in here',
 
@@ -625,6 +631,7 @@ export const translations: Record<Language, Translations> = {
     navProducts: 'Produits',
     navCategories: 'Catégories',
     navShopOrders: 'Commandes Boutique',
+    navHeroSlides: 'Diapositives Page d\'Accueil',
     navMyVehicles: 'Mes Véhicules',
     navMyAssignment: 'Mon Affectation',
     navMyTrips: 'Mes Trajets',
@@ -744,6 +751,8 @@ export const translations: Record<Language, Translations> = {
     asOwnerDesc: 'Enregistrez votre flotte, affectez des chauffeurs et suivez vos gains.',
     asDriver: 'Chauffeur Professionnel',
     asDriverDesc: 'Gérez vos trajets, signalez le statut de livraison et restez connecté.',
+    asBuyer: 'Client / Acheteur',
+    asBuyerDesc: 'Achetez des pièces détachées, huiles moteur et accessoires avec commande immédiate.',
     alreadyHaveAccount: 'Vous avez déjà un compte ?',
     loginHere: 'Connectez-vous ici',
 
@@ -879,6 +888,7 @@ export const translations: Record<Language, Translations> = {
     navProducts: 'እቃዎች',
     navCategories: 'ምድቦች',
     navShopOrders: 'የትዕዛዝ ዝርዝር',
+    navHeroSlides: 'የመነሻ ገጽ ስላይዶች',
     navMyVehicles: 'የኔ ተሽከርካሪዎች',
     navMyAssignment: 'የኔ ምደባ',
     navMyTrips: 'የኔ ጉዞዎች',
@@ -998,6 +1008,8 @@ export const translations: Record<Language, Translations> = {
     asOwnerDesc: 'ተሽከርካሪዎችዎን ይመዝግቡ፣ አሽከርካሪዎችን ይመድቡ እና ገቢዎትን ይቆጣጠሩ።',
     asDriver: 'ሙያተኛ አሽከርካሪ',
     asDriverDesc: 'ጉዞዎችን ያስተዳድሩ፣ የጭነት ሁኔታዎችን ያሳውቁ እና ግንኙነትዎን ያጠናክሩ።',
+    asBuyer: 'የመኪና እቃዎች ገዢ',
+    asBuyerDesc: 'የከባድ መኪና መለዋወጫዎች፣ ሞተር ዘይት እና ጎማዎችን ወዲያውኑ ይግዙ።',
     alreadyHaveAccount: 'ቀደም ሲል መለያ አለዎት?',
     loginHere: 'እዚህ ይግቡ',
 
@@ -1133,6 +1145,7 @@ export const translations: Record<Language, Translations> = {
     navProducts: 'المنتجات',
     navCategories: 'الفئات',
     navShopOrders: 'طلبات المتجر',
+    navHeroSlides: 'شرائح الواجهة الرئيسية',
     navMyVehicles: 'مركباتي',
     navMyAssignment: 'مركبتي المخصصة',
     navMyTrips: 'رحلاتي',
@@ -1252,6 +1265,8 @@ export const translations: Record<Language, Translations> = {
     asOwnerDesc: 'سجل أسطولك، وعين سائقين معتمدين، وتتبع أرباح شاحناتك.',
     asDriver: 'سائق محترف',
     asDriverDesc: 'أدر رحلاتك، وأبلغ عن حالات الشحن، وابق على تواصل مع مالك الأسطول.',
+    asBuyer: 'عميل / مشتري قطع الغيار',
+    asBuyerDesc: 'شراء قطع غيار الشاحنات وزيوت المحركات والإكسسوارات مع تجهيز فوري للطلبات.',
     alreadyHaveAccount: 'هل لديك حساب بالفعل؟',
     loginHere: 'سجل الدخول هنا',
 
@@ -1391,6 +1406,7 @@ export const translations: Record<Language, Translations> = {
     navProducts: 'ፍርያት',
     navCategories: 'ምድባት',
     navShopOrders: 'ትእዛዛት ድኳን',
+    navHeroSlides: 'ስላይዳት መእተዊ ገጽ',
     navMyVehicles: 'መካይነይ',
     navMyAssignment: 'ምደባይ',
     navMyTrips: 'ጉዕዞታተይ',
@@ -1510,6 +1526,8 @@ export const translations: Record<Language, Translations> = {
     asOwnerDesc: 'ፍሊትኩም መዝግቡ፣ መራሕቲ መካይን መድቡ፣ ኣታዊታት መካይንኩም ተኸታተሉ።',
     asDriver: 'ሞያተኛ መራሕ መኪና',
     asDriverDesc: 'ጉዕዞታትኩም ኣመሓድሩ፣ ኩነታት ኣረክቦ ሓብሩ፣ ርክብኩም ሓልዉ።',
+    asBuyer: 'ዓዳጊ መለዋወጢ ኣቑሑ',
+    asBuyerDesc: 'መለዋወጢ ኣቑሑ መካይን፣ ዘይቲ ሞተርን ጎማታትን ብቕልጡፍ ይዓድጉ።',
     alreadyHaveAccount: 'ድሮ ሕሳብ ኣለኩም ድዩ?',
     loginHere: 'ኣብዚ እተዉ',
 

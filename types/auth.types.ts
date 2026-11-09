@@ -1,4 +1,4 @@
-export type Role = 'ADMIN' | 'VEHICLE_OWNER' | 'DRIVER';
+export type Role = 'ADMIN' | 'VEHICLE_OWNER' | 'DRIVER' | 'BUYER';
 export type AccountStatus = 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
 
 export interface User {
@@ -11,6 +11,15 @@ export interface User {
   role: Role;
   accountStatus: AccountStatus;
   emailVerified: boolean;
+}
+
+export interface BuyerRegisterInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  confirmPassword?: string;
 }
 
 export interface AuthResponse {

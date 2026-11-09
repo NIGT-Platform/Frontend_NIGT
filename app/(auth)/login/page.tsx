@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,8 +23,10 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
   const { t } = useLanguage();
   const [apiError, setApiError] = useState('');
   
@@ -48,7 +50,13 @@ export default function LoginPage() {
         localStorage.setItem('userRole', response.user?.role || '');
       }
       
-      router.push('/dashboard'); 
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      } else if (response.user?.role === 'BUYER') {
+        router.push('/store');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (error: any) {
       setApiError(error.response?.data?.message || 'Invalid credentials. Please try again.');
     }
@@ -100,7 +108,10 @@ export default function LoginPage() {
                 <label className="block text-sm font-medium text-slate-700">
                   {t.password} <span className="text-red-500">*</span>
                 </label>
-                <Link href="/forgot-password" className="text-sm font-medium text-[var(--color-secondary)] hover:text-amber-700">
+                <Link 
+                  href="/forgot-password" 
+                  className="text-xs font-semibold text-[var(--color-primary)] hover:underline"
+                >
                   {t.forgotPassword}
                 </Link>
               </div>
@@ -109,8 +120,8 @@ export default function LoginPage() {
                 placeholder={t.passwordPlaceholder} 
                 error={!!errors.password} 
               />
-              {errors.password?.message && (
-                <p className="mt-1 text-sm text-red-500">{errors.password.message as string}</p>
+              {errors.password && (
+                <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
               )}
             </div>
 
@@ -124,7 +135,10 @@ export default function LoginPage() {
           <div className="mt-8 text-center border-t border-slate-100 pt-6">
             <p className="text-sm text-slate-600">
               {t.noAccount}{" "}
-              <Link href="/register" className="font-medium text-[var(--color-primary)] hover:underline">
+              <Link 
+                href={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : "/register"} 
+                className="font-medium text-[var(--color-primary)] hover:underline"
+              >
                 {t.createOne}
               </Link>
             </p>
@@ -132,5 +146,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

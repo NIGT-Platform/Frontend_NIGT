@@ -20,11 +20,16 @@ export default function CheckoutPage() {
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (!token) {
+      router.push(`/register/buyer?redirect=${encodeURIComponent('/store/checkout')}`);
+      return;
+    }
     getCart()
       .then(setCart)
       .catch(() => setError(t.cartEmptyDesc))
       .finally(() => setLoading(false));
-  }, [t.cartEmptyDesc]);
+  }, [router, t.cartEmptyDesc]);
 
   const total = cart?.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0) || 0;
 

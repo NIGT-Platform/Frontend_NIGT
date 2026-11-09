@@ -92,6 +92,7 @@ export default function AdminDashboard() {
       // Non-admin users get redirected
       if (userRole === 'DRIVER') router.push('/driver/my-assignment');
       else if (userRole === 'VEHICLE_OWNER') router.push('/owner/vehicles');
+      else if (userRole === 'BUYER') router.push('/store');
       else router.push('/login');
     }
   }, [router]);

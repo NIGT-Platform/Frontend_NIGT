@@ -1,11 +1,16 @@
 'use client';
+import { Suspense } from 'react';
 import Link from 'next/link';
-import { Truck, Users, ArrowLeft } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Truck, Users, ArrowLeft, ShoppingBag } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 
-export default function RegisterSelectionPage() {
+function RegisterSelectionContent() {
   const { t } = useLanguage();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect');
+  const redirectQuery = redirect ? `?redirect=${encodeURIComponent(redirect)}` : '';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
@@ -26,9 +31,23 @@ export default function RegisterSelectionPage() {
         </p>
       </div>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4 sm:px-0">
+      <div className="sm:mx-auto sm:w-full sm:max-w-4xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 sm:px-0">
           
+          {/* Buyer / Customer Card */}
+          <Link href={`/register/buyer${redirectQuery}`} className="block group">
+            <div className="bg-white rounded-xl shadow-sm border-2 border-emerald-100 p-8 text-center hover:border-emerald-500 hover:shadow-md transition-all h-full flex flex-col items-center justify-center relative overflow-hidden">
+              <span className="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                Instant Access
+              </span>
+              <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4 group-hover:bg-emerald-100 text-emerald-600 transition-colors">
+                <ShoppingBag className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-bold text-[var(--color-primary)] mb-2">{t.asBuyer}</h3>
+              <p className="text-sm text-slate-500">{t.asBuyerDesc}</p>
+            </div>
+          </Link>
+
           {/* Vehicle Owner Card */}
           <Link href="/register/vehicle-owner" className="block group">
             <div className="bg-white rounded-xl shadow-sm border-2 border-slate-100 p-8 text-center hover:border-[var(--color-secondary)] hover:shadow-md transition-all h-full flex flex-col items-center justify-center">
@@ -56,12 +75,20 @@ export default function RegisterSelectionPage() {
         <div className="mt-8 text-center">
           <p className="text-sm text-slate-600">
             {t.alreadyHaveAccount}{' '}
-            <Link href="/login" className="font-medium text-[var(--color-primary)] hover:underline">
+            <Link href={`/login${redirectQuery}`} className="font-medium text-[var(--color-primary)] hover:underline">
               {t.loginHere}
             </Link>
           </p>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterSelectionPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center">Loading...</div>}>
+      <RegisterSelectionContent />
+    </Suspense>
   );
 }

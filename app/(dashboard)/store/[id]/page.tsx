@@ -1,8 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ShoppingCart, Package, Loader2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Package, Loader2, AlertCircle, ChevronLeft, ChevronRight, Zap } from 'lucide-react';
 import { getFileUrl } from '@/lib/axios';
 import { getProduct, addToCart, Product } from '@/services/shop.service';
 import { useLanguage } from '@/context/LanguageContext';
@@ -10,6 +10,7 @@ import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { WhatsAppInquiryButton, WhatsAppFloatingWidget, WhatsAppIcon } from '@/components/ui/WhatsAppButton';
 
 export default function ProductDetailPage() {
+  const router = useRouter();
   const params = useParams();
   const id = params.id as string;
   const { t } = useLanguage();
@@ -36,6 +37,11 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = async () => {
     if (!product || product.stockQty === 0) return;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (!token) {
+      router.push(`/register/buyer?redirect=${encodeURIComponent(`/store/${product.id}`)}`);
+      return;
+    }
     setAdding(true); setCartError('');
     try {
       await addToCart(product.id, quantity);
@@ -43,6 +49,22 @@ export default function ProductDetailPage() {
       setTimeout(() => setAdded(false), 3000);
     } catch (err: any) {
       setCartError(err?.response?.data?.message || 'Failed to add to cart.');
+    } finally { setAdding(false); }
+  };
+
+  const handleBuyNow = async () => {
+    if (!product || product.stockQty === 0) return;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (!token) {
+      router.push(`/register/buyer?redirect=${encodeURIComponent(`/store/checkout`)}`);
+      return;
+    }
+    setAdding(true); setCartError('');
+    try {
+      await addToCart(product.id, quantity);
+      router.push('/store/checkout');
+    } catch (err: any) {
+      setCartError(err?.response?.data?.message || 'Failed to prepare order.');
     } finally { setAdding(false); }
   };
 
@@ -215,21 +237,36 @@ export default function ProductDetailPage() {
               className="w-full"
             />
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleBuyNow}
+                disabled={isOutOfStock || adding}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${
+                  isOutOfStock ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
+                }`}
+              >
+                <Zap className="h-4 w-4" />
+                Buy / Order Now
+              </button>
+
               <button
                 onClick={handleAddToCart}
                 disabled={isOutOfStock || adding}
                 className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${
                   isOutOfStock ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  : added ? 'bg-emerald-600 text-white'
+                  : added ? 'bg-emerald-800 text-white'
                   : 'bg-[var(--color-primary)] text-white hover:opacity-90 shadow-sm'
                 }`}
               >
                 {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShoppingCart className="h-4 w-4" />}
                 {isOutOfStock ? t.outOfStock : added ? t.addedToCart : t.addToCart}
               </button>
-              <Link href="/store/cart">
-                <button className="px-5 py-3 border border-slate-200 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">
+            </div>
+
+            <div className="pt-1">
+              <Link href="/store/cart" className="block">
+                <button className="w-full py-2.5 border border-slate-200 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">
                   {t.viewCart}
                 </button>
               </Link>

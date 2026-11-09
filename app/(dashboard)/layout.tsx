@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Users, LayoutDashboard, UserCircle, LogOut, ShieldCheck, Menu, X, Truck, FileEdit, Key, Package, Compass, ShoppingBag, ShoppingCart, Tag, Store, Receipt } from 'lucide-react';
+import { Users, LayoutDashboard, UserCircle, LogOut, ShieldCheck, Menu, X, Truck, FileEdit, Key, Package, Compass, ShoppingBag, ShoppingCart, Tag, Store, Receipt, Image as ImageIcon } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
@@ -38,6 +38,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: t.navProducts, href: '/admin/shop/products', icon: Package, show: role === 'ADMIN' },
     { name: t.navCategories, href: '/admin/shop/categories', icon: Tag, show: role === 'ADMIN' },
     { name: t.navShopOrders, href: '/admin/shop/orders', icon: ShoppingCart, show: role === 'ADMIN' },
+    { name: t.navHeroSlides, href: '/admin/slides', icon: ImageIcon, show: role === 'ADMIN' },
     // Vehicle Owner nav items
     { name: t.navMyVehicles, href: '/owner/vehicles', icon: Truck, show: role === 'VEHICLE_OWNER' },
     { name: t.navJobs, href: '/owner/jobs', icon: Package, show: role === 'VEHICLE_OWNER' },
@@ -45,11 +46,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     // Driver nav items
     { name: t.navMyAssignment, href: '/driver/my-assignment', icon: Key, show: role === 'DRIVER' },
     { name: t.navMyTrips, href: '/driver/trips', icon: Compass, show: role === 'DRIVER' },
-    // E-Commerce Store for Buyers (Vehicle Owner, Driver, and Admin preview)
+    // E-Commerce Store for Buyers (Vehicle Owner, Driver, Buyer, and Admin preview)
     { name: t.navAutoStore, href: '/store', icon: Store, show: true },
-    { name: t.navMyCart, href: '/store/cart', icon: ShoppingCart, show: role === 'VEHICLE_OWNER' || role === 'DRIVER' },
-    { name: t.navMyOrders, href: '/store/orders', icon: Receipt, show: role === 'VEHICLE_OWNER' || role === 'DRIVER' },
+    { name: t.navMyCart, href: '/store/cart', icon: ShoppingCart, show: role === 'VEHICLE_OWNER' || role === 'DRIVER' || role === 'BUYER' },
+    { name: t.navMyOrders, href: '/store/orders', icon: Receipt, show: role === 'VEHICLE_OWNER' || role === 'DRIVER' || role === 'BUYER' },
     // Guest items if not logged in
+    { name: t.asBuyer, href: '/register/buyer', icon: ShoppingBag, show: !role },
     { name: t.navLoginToOrder, href: '/login', icon: Key, show: !role },
     { name: t.navHome, href: '/', icon: LayoutDashboard, show: !role },
     // Common
@@ -140,7 +142,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </span>
             {role && (
               <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                {role === 'ADMIN' ? 'Admin' : role === 'VEHICLE_OWNER' ? 'Vehicle Owner' : 'Driver'}
+                {role === 'ADMIN' ? 'Admin' : role === 'VEHICLE_OWNER' ? 'Vehicle Owner' : role === 'BUYER' ? 'Customer' : 'Driver'}
               </span>
             )}
           </div>
