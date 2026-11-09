@@ -54,6 +54,23 @@ export default function StorePage() {
   const primaryImage = (product: Product) =>
     product.images?.find((i) => i.isPrimary) || product.images?.[0];
 
+  const getCategoryFallbackImage = (product: Product): string => {
+    const cat = (product.category?.slug || product.category?.name || product.name || '').toLowerCase();
+    if (cat.includes('oil') || cat.includes('fluid') || cat.includes('lubric') || cat.includes('ዘይቲ')) {
+      return 'https://images.unsplash.com/photo-1615906655593-ad0386982a0f?w=600&auto=format&fit=crop&q=80';
+    }
+    if (cat.includes('tire') || cat.includes('wheel') || cat.includes('tube') || cat.includes('ጎማ')) {
+      return 'https://images.unsplash.com/photo-1578844251758-2f71da64c96f?w=600&auto=format&fit=crop&q=80';
+    }
+    if (cat.includes('battery') || cat.includes('elect') || cat.includes('ባትሪ')) {
+      return 'https://images.unsplash.com/photo-1629897048514-3dd7414fe72a?w=600&auto=format&fit=crop&q=80';
+    }
+    if (cat.includes('brake') || cat.includes('bolt') || cat.includes('hardware')) {
+      return 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=600&auto=format&fit=crop&q=80';
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
@@ -135,27 +152,23 @@ export default function StorePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product) => {
             const img = primaryImage(product);
+            const rawPath = img?.imageUrl || '';
+            const isDeadUpload = rawPath.startsWith('uploads/') || rawPath.startsWith('/uploads/');
+            const imgUrl = (!rawPath || isDeadUpload) ? getCategoryFallbackImage(product) : getFileUrl(rawPath);
             const isOutOfStock = product.stockQty === 0;
             const isAdded = addedId === product.id;
             return (
               <div key={product.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
                 <Link href={`/store/${product.id}`} className="block">
                   <div className="relative aspect-square bg-slate-100 overflow-hidden">
-                    {img ? (
-                      <img
-                        src={getFileUrl(img.imageUrl)}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            'https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=600&auto=format&fit=crop&q=80';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Package className="h-12 w-12 text-slate-300" />
-                      </div>
-                    )}
+                    <img
+                      src={imgUrl}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = getCategoryFallbackImage(product);
+                      }}
+                    />
                     {isOutOfStock && (
                       <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center">
                         <span className="bg-red-600 text-white text-xs font-extrabold px-4 py-1.5 rounded-full shadow-lg tracking-wider animate-pulse">

@@ -125,6 +125,23 @@ export default function LandingPage() {
       .catch(() => {});
   }, []);
 
+  const getCategoryFallbackImage = (item: any): string => {
+    const cat = (item?.category?.slug || item?.category?.name || item?.name || '').toLowerCase();
+    if (cat.includes('oil') || cat.includes('fluid') || cat.includes('lubric') || cat.includes('ዘይቲ')) {
+      return 'https://images.unsplash.com/photo-1615906655593-ad0386982a0f?w=600&auto=format&fit=crop&q=80';
+    }
+    if (cat.includes('tire') || cat.includes('wheel') || cat.includes('tube') || cat.includes('ጎማ')) {
+      return 'https://images.unsplash.com/photo-1578844251758-2f71da64c96f?w=600&auto=format&fit=crop&q=80';
+    }
+    if (cat.includes('battery') || cat.includes('elect') || cat.includes('ባትሪ')) {
+      return 'https://images.unsplash.com/photo-1629897048514-3dd7414fe72a?w=600&auto=format&fit=crop&q=80';
+    }
+    if (cat.includes('brake') || cat.includes('bolt') || cat.includes('hardware')) {
+      return 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=600&auto=format&fit=crop&q=80';
+  };
+
   const fallbackProducts = [
     {
       id: 'demo-1',
@@ -339,7 +356,9 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {displayedProducts.map((item: any) => {
               const primaryImageObj = item.images?.find((img: any) => img.isPrimary) || item.images?.[0];
-              const imgUrl = primaryImageObj ? getFileUrl(primaryImageObj.imageUrl) : (item.imageUrl || '');
+              const rawPath = primaryImageObj?.imageUrl || item.imageUrl || '';
+              const isDeadUpload = rawPath.startsWith('uploads/') || rawPath.startsWith('/uploads/');
+              const imgUrl = (!rawPath || isDeadUpload) ? getCategoryFallbackImage(item) : getFileUrl(rawPath);
               const isSoldOut = item.stockQty === 0;
 
               return (
@@ -349,21 +368,14 @@ export default function LandingPage() {
                 >
                   {/* Photo area */}
                   <div className="relative aspect-square bg-slate-100 overflow-hidden">
-                    {imgUrl ? (
-                      <img
-                        src={imgUrl}
-                        alt={item.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            'https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=600&auto=format&fit=crop&q=80';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-300">
-                        <Package className="h-12 w-12" />
-                      </div>
-                    )}
+                    <img
+                      src={imgUrl}
+                      alt={item.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = getCategoryFallbackImage(item);
+                      }}
+                    />
 
                     {/* SOLD OUT Overlay */}
                     {isSoldOut ? (
