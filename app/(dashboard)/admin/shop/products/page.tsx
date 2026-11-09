@@ -161,7 +161,7 @@ export default function AdminProductsPage() {
                       <span className="text-xs text-[var(--color-primary)] font-medium mb-2">{product.category.name}</span>
                     )}
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-lg font-bold text-slate-900">ETB {product.price.toLocaleString()}</p>
+                      <p className="text-lg font-bold text-slate-900">GNF {product.price.toLocaleString()}</p>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isOutOfStock ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
                         {isOutOfStock ? 'Out of Stock' : `${product.stockQty} in stock`}
                       </span>

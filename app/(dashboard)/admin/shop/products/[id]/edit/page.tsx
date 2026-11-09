@@ -190,7 +190,7 @@ export default function EditProductPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Price (ETB)</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Price (GNF)</label>
               <input name="price" type="number" min="0" step="0.01" value={form.price} onChange={handleChange} className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" />
             </div>
             <div>

@@ -125,7 +125,7 @@ export default function AdminOrdersPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-right">
-                        <p className="font-bold text-slate-800">ETB {order.totalAmount.toLocaleString()}</p>
+                        <p className="font-bold text-slate-800">GNF {order.totalAmount.toLocaleString()}</p>
                         <p className="text-xs text-slate-500">{order.items.length} item{order.items.length !== 1 ? 's' : ''}</p>
                       </div>
                       <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLORS[order.status] || 'bg-slate-100 text-slate-600'}`}>
@@ -152,10 +152,10 @@ export default function AdminOrdersPage() {
                             <div key={item.id} className="flex items-center justify-between bg-white rounded-lg border border-slate-100 px-4 py-3">
                               <div>
                                 <p className="text-sm font-medium text-slate-800">{item.productName}</p>
-                                <p className="text-xs text-slate-500">ETB {item.productPrice.toLocaleString()} × {item.quantity}</p>
+                                <p className="text-xs text-slate-500">GNF {item.productPrice.toLocaleString()} × {item.quantity}</p>
                               </div>
                               <p className="text-sm font-bold text-slate-800">
-                                ETB {(item.productPrice * item.quantity).toLocaleString()}
+                                GNF {(item.productPrice * item.quantity).toLocaleString()}
                               </p>
                             </div>
                           ))}

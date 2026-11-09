@@ -226,7 +226,7 @@ export default function CreateProductPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Price (ETB) <span className="text-red-500">*</span>
+                Price (GNF) <span className="text-red-500">*</span>
               </label>
               <input
                 name="price"
