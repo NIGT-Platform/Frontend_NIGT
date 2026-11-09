@@ -1,9 +1,14 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
+const PRODUCTION_API_URL = 'https://backend-nigt.onrender.com/api';
+
 export const getApiUrl = () => {
   if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
   if (typeof window !== 'undefined') {
+    if (window.location.hostname.includes('vercel.app') || window.location.hostname !== 'localhost') {
+      return PRODUCTION_API_URL;
+    }
     return `http://${window.location.hostname}:5000/api`;
   }
   return 'http://localhost:5000/api';
@@ -12,11 +17,8 @@ export const getApiUrl = () => {
 export const getFileUrl = (filePath: string | null | undefined): string => {
   if (!filePath) return '';
   if (filePath.startsWith('http://') || filePath.startsWith('https://')) return filePath;
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL
-    ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/?$/, '')
-    : typeof window !== 'undefined'
-      ? `http://${window.location.hostname}:5000`
-      : 'http://localhost:5000';
+  const apiBase = getApiUrl();
+  const baseUrl = apiBase.replace(/\/api\/?$/, '');
   const cleanPath = filePath.startsWith('/') ? filePath : `/${filePath}`;
   return `${baseUrl}${cleanPath}`;
 };

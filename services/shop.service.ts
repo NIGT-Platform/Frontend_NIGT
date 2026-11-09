@@ -157,6 +157,11 @@ export const adminAddProductImage = async (productId: string, formData: FormData
   return res.data.image;
 };
 
+export const adminSetPrimaryProductImage = async (productId: string, imageId: string): Promise<ProductImage> => {
+  const res = await axiosInstance.patch(`/admin/shop/products/${productId}/images/${imageId}/primary`);
+  return res.data.image;
+};
+
 export const adminDeleteProductImage = async (imageId: string): Promise<void> => {
   await axiosInstance.delete(`/admin/shop/products/images/${imageId}`);
 };

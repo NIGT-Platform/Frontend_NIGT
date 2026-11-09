@@ -9,7 +9,7 @@ import { RoleGuard } from '@/components/auth/RoleGuard';
 import { getFileUrl } from '@/lib/axios';
 import {
   adminGetProducts, adminUpdateProduct, adminGetCategories, adminAddProductImage,
-  adminDeleteProductImage, Product, ProductCategory,
+  adminDeleteProductImage, adminSetPrimaryProductImage, Product, ProductCategory,
 } from '@/services/shop.service';
 
 export default function EditProductPage() {
@@ -116,20 +116,14 @@ export default function EditProductPage() {
   };
 
   const handleSetPrimary = async (imageId: string) => {
-    if (!product) return;
-    const formData = new FormData();
-    formData.append('isPrimary', 'true');
-    // Re-upload won't work; instead, we use a workaround: delete and re-add
-    // Since we have no set-primary endpoint, mark via updateProduct approach:
-    // We'll simply call add with isPrimary on the existing image URL
     try {
-      // Find the image
-      const img = product.images.find((i) => i.id === imageId);
-      if (!img) return;
-      // We can't easily set primary without a dedicated endpoint,
-      // so the admin should re-upload it with isPrimary checked.
-      setImageError('To set primary: upload the image again with "Set as primary" checked.');
-    } catch { setError('Failed to set primary image.'); }
+      await adminSetPrimaryProductImage(id, imageId);
+      await loadProduct();
+      setSuccess('Primary photo updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch {
+      setError('Failed to set primary image.');
+    }
   };
 
   if (loading) {
@@ -228,7 +222,10 @@ export default function EditProductPage() {
                     src={getFileUrl(img.imageUrl)}
                     alt="Product"
                     className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).src = ''; }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        'https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=600&auto=format&fit=crop&q=80';
+                    }}
                   />
                   {img.isPrimary && (
                     <div className="absolute top-1 left-1">
@@ -237,10 +234,20 @@ export default function EditProductPage() {
                       </span>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                    {!img.isPrimary && (
+                      <button
+                        onClick={() => handleSetPrimary(img.id)}
+                        title="Set as primary photo"
+                        className="p-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg shadow-sm"
+                      >
+                        <Star className="h-3.5 w-3.5 fill-white" />
+                      </button>
+                    )}
                     <button
                       onClick={() => handleDeleteImage(img.id)}
-                      className="p-1.5 bg-red-600 text-white rounded-lg"
+                      title="Delete photo"
+                      className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-sm"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>

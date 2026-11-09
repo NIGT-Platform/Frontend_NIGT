@@ -93,7 +93,10 @@ export default function ProductDetailPage() {
                 src={getFileUrl(selectedImage.imageUrl)}
                 alt={product.name}
                 className="w-full h-full object-cover"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src =
+                    'https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=600&auto=format&fit=crop&q=80';
+                }}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">

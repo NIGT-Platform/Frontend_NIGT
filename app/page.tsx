@@ -338,7 +338,8 @@ export default function LandingPage() {
           {/* Product Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {displayedProducts.map((item: any) => {
-              const imgUrl = item.images?.[0] ? getFileUrl(item.images[0].imageUrl) : item.imageUrl || '';
+              const primaryImageObj = item.images?.find((img: any) => img.isPrimary) || item.images?.[0];
+              const imgUrl = primaryImageObj ? getFileUrl(primaryImageObj.imageUrl) : (item.imageUrl || '');
               const isSoldOut = item.stockQty === 0;
 
               return (

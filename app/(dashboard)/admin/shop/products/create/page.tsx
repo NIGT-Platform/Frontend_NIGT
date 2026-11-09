@@ -2,9 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, AlertCircle, Save, Plus, Check } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Save, Plus, Check, Upload, Image as ImageIcon } from 'lucide-react';
 import { RoleGuard } from '@/components/auth/RoleGuard';
-import { adminCreateProduct, adminGetCategories, adminCreateCategory, ProductCategory } from '@/services/shop.service';
+import { adminCreateProduct, adminGetCategories, adminCreateCategory, adminAddProductImage, ProductCategory } from '@/services/shop.service';
 
 export default function CreateProductPage() {
   const router = useRouter();
@@ -17,6 +17,10 @@ export default function CreateProductPage() {
   const [newCatName, setNewCatName] = useState('');
   const [catCreating, setCatCreating] = useState(false);
   const [catError, setCatError] = useState('');
+
+  // Photo upload state
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     categoryId: '',
@@ -66,6 +70,13 @@ export default function CreateProductPage() {
     }
   };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.categoryId || !form.name || !form.price || !form.stockQty) {
@@ -84,7 +95,16 @@ export default function CreateProductPage() {
         sku: form.sku.trim() || undefined,
         isActive: form.isActive,
       });
-      router.push(`/admin/shop/products/${product.id}/edit`);
+
+      // If a photo was selected, upload it immediately as the primary photo
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        formData.append('isPrimary', 'true');
+        await adminAddProductImage(product.id, formData);
+      }
+
+      router.push('/admin/shop/products');
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Failed to create product.');
     } finally {
@@ -103,7 +123,7 @@ export default function CreateProductPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-slate-800">Add New Product</h1>
-            <p className="text-sm text-slate-500">Fill in the details, then add photos on the next step</p>
+            <p className="text-sm text-slate-500">Fill in the product details and select a photo</p>
           </div>
         </div>
 
@@ -266,6 +286,32 @@ export default function CreateProductPage() {
               placeholder="e.g. BRD-295-80-R225"
               className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] font-mono"
             />
+          </div>
+
+          {/* Product Photo */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Product Photo (optional)
+            </label>
+            <div className="flex items-center gap-4">
+              <label className="flex-1 flex items-center justify-center gap-2 border-2 border-dashed border-slate-300 rounded-lg py-4 cursor-pointer hover:border-[var(--color-primary)] transition-colors text-slate-500 hover:text-[var(--color-primary)] text-sm">
+                <Upload className="h-4 w-4" />
+                {imageFile ? imageFile.name : 'Click to select product image'}
+                <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+              </label>
+              {imagePreview && (
+                <div className="relative h-16 w-16 rounded-lg overflow-hidden border border-slate-200 flex-shrink-0">
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => { setImageFile(null); setImagePreview(null); }}
+                    className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
