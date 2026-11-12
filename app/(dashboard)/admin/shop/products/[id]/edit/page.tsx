@@ -9,7 +9,8 @@ import { RoleGuard } from '@/components/auth/RoleGuard';
 import { getFileUrl } from '@/lib/axios';
 import {
   adminGetProducts, adminUpdateProduct, adminGetCategories, adminAddProductImage,
-  adminDeleteProductImage, adminSetPrimaryProductImage, Product, ProductCategory,
+  adminDeleteProductImage, adminSetPrimaryProductImage, adminGetCloudinaryStatus,
+  Product, ProductCategory, CloudinaryStatus,
 } from '@/services/shop.service';
 
 export default function EditProductPage() {
@@ -30,14 +31,20 @@ export default function EditProductPage() {
 
   // Image upload state
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imageIsPrimary, setImageIsPrimary] = useState(false);
+  const [imageIsPrimary, setImageIsPrimary] = useState(true);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [imageError, setImageError] = useState('');
+  const [cloudinaryStatus, setCloudinaryStatus] = useState<CloudinaryStatus | null>(null);
 
   const loadProduct = async () => {
     try {
-      const [allProducts, cats] = await Promise.all([adminGetProducts(), adminGetCategories()]);
+      const [allProducts, cats, cloud] = await Promise.all([
+        adminGetProducts(),
+        adminGetCategories(),
+        adminGetCloudinaryStatus().catch(() => null),
+      ]);
+      if (cloud) setCloudinaryStatus(cloud);
       const p = allProducts.find((x) => x.id === id);
       if (!p) { setError('Product not found.'); setLoading(false); return; }
       setProduct(p);
@@ -100,8 +107,10 @@ export default function EditProductPage() {
       formData.append('image', imageFile);
       formData.append('isPrimary', String(imageIsPrimary));
       await adminAddProductImage(id, formData);
-      setImageFile(null); setImagePreview(null); setImageIsPrimary(false);
+      setImageFile(null); setImagePreview(null); setImageIsPrimary(true);
       await loadProduct();
+      setSuccess('Product photo uploaded successfully!');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
       setImageError(err?.response?.data?.message || 'Failed to upload image.');
     } finally { setUploading(false); }
@@ -211,7 +220,24 @@ export default function EditProductPage() {
 
         {/* Image Management */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
-          <h2 className="font-semibold text-slate-800 flex items-center gap-2"><ImageIcon className="h-5 w-5 text-slate-500" /> Product Photos</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <h2 className="font-semibold text-slate-800 flex items-center gap-2">
+              <ImageIcon className="h-5 w-5 text-slate-500" /> Product Photos
+            </h2>
+            {cloudinaryStatus && (
+              <span
+                className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                  cloudinaryStatus.configured
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                }`}
+              >
+                {cloudinaryStatus.configured
+                  ? `Cloudinary Connected (${cloudinaryStatus.cloudName})`
+                  : 'Local Storage Mode (/uploads)'}
+              </span>
+            )}
+          </div>
 
           {/* Existing Images */}
           {product?.images && product.images.length > 0 ? (

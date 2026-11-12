@@ -166,6 +166,19 @@ export const adminDeleteProductImage = async (imageId: string): Promise<void> =>
   await axiosInstance.delete(`/admin/shop/products/images/${imageId}`);
 };
 
+export interface CloudinaryStatus {
+  configured: boolean;
+  cloudName: string | null;
+  hasApiKey: boolean;
+  hasApiSecret: boolean;
+  environment: string;
+}
+
+export const adminGetCloudinaryStatus = async (): Promise<CloudinaryStatus> => {
+  const res = await axiosInstance.get('/admin/shop/cloudinary-status');
+  return res.data.cloudinary;
+};
+
 // ─────────────────────────────────────────────
 // Admin — Orders
 // ─────────────────────────────────────────────

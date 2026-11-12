@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, AlertCircle, Save, Plus, Check, Upload, Image as ImageIcon } from 'lucide-react';
 import { RoleGuard } from '@/components/auth/RoleGuard';
-import { adminCreateProduct, adminGetCategories, adminCreateCategory, adminAddProductImage, ProductCategory } from '@/services/shop.service';
+import { adminCreateProduct, adminDeleteProduct, adminGetCategories, adminCreateCategory, adminAddProductImage, ProductCategory } from '@/services/shop.service';
 
 export default function CreateProductPage() {
   const router = useRouter();
@@ -101,7 +101,13 @@ export default function CreateProductPage() {
         const formData = new FormData();
         formData.append('image', imageFile);
         formData.append('isPrimary', 'true');
-        await adminAddProductImage(product.id, formData);
+        try {
+          await adminAddProductImage(product.id, formData);
+        } catch (imgErr: any) {
+          // Roll back product creation so no duplicate product without its photo is left behind
+          await adminDeleteProduct(product.id).catch(() => {});
+          throw imgErr;
+        }
       }
 
       router.push('/admin/shop/products');

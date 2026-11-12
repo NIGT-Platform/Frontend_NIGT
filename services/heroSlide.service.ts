@@ -30,3 +30,4 @@ export const createHeroSlide = async (formData: FormData): Promise<HeroSlide> =>
 export const deleteHeroSlide = async (id: string): Promise<void> => {
   await axiosInstance.delete(`/hero-slides/admin/${id}`);
 };
+

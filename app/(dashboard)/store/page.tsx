@@ -64,7 +64,9 @@ export default function StorePage() {
   };
 
   const primaryImage = (product: Product) =>
-    product.images?.find((i) => i.isPrimary) || product.images?.[0];
+    product.images?.find((i) => i.isPrimary && !i.imageUrl?.includes('images.unsplash.com')) ||
+    product.images?.find((i) => i.isPrimary) ||
+    product.images?.[0];
 
   const getCategoryFallbackImage = (product: Product): string => {
     const cat = (product.category?.slug || product.category?.name || product.name || '').toLowerCase();
@@ -192,8 +194,7 @@ export default function StorePage() {
           {products.map((product) => {
             const img = primaryImage(product);
             const rawPath = img?.imageUrl || '';
-            const isDeadUpload = rawPath.startsWith('uploads/') || rawPath.startsWith('/uploads/');
-            const imgUrl = (!rawPath || isDeadUpload) ? getCategoryFallbackImage(product) : getFileUrl(rawPath);
+            const imgUrl = rawPath ? getFileUrl(rawPath) : getCategoryFallbackImage(product);
             const isOutOfStock = product.stockQty === 0;
             const isAdded = addedId === product.id;
             return (

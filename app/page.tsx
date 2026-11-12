@@ -377,10 +377,12 @@ export default function LandingPage() {
           {/* Product Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {displayedProducts.map((item: any) => {
-              const primaryImageObj = item.images?.find((img: any) => img.isPrimary) || item.images?.[0];
+              const primaryImageObj =
+                item.images?.find((img: any) => img.isPrimary && !img.imageUrl?.includes('images.unsplash.com')) ||
+                item.images?.find((img: any) => img.isPrimary) ||
+                item.images?.[0];
               const rawPath = primaryImageObj?.imageUrl || item.imageUrl || '';
-              const isDeadUpload = rawPath.startsWith('uploads/') || rawPath.startsWith('/uploads/');
-              const imgUrl = (!rawPath || isDeadUpload) ? getCategoryFallbackImage(item) : getFileUrl(rawPath);
+              const imgUrl = rawPath ? getFileUrl(rawPath) : getCategoryFallbackImage(item);
               const isSoldOut = item.stockQty === 0;
 
               return (

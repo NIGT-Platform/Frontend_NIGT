@@ -34,7 +34,7 @@ export const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_API_URL) {
-      config.baseURL = `http://${window.location.hostname}:5000/api`;
+      config.baseURL = getApiUrl();
     }
     // Only attempt to read localStorage if we are in the browser
     if (typeof window !== 'undefined') {
