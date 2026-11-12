@@ -46,8 +46,12 @@ export default function ProductDetailPage() {
     try {
       await addToCart(product.id, quantity);
       setAdded(true);
-      setTimeout(() => setAdded(false), 3000);
+      setTimeout(() => setAdded(false), 4000);
     } catch (err: any) {
+      if (err?.response?.status === 401) {
+        router.push(`/register/buyer?redirect=${encodeURIComponent(`/store/${product.id}`)}`);
+        return;
+      }
       setCartError(err?.response?.data?.message || 'Failed to add to cart.');
     } finally { setAdding(false); }
   };
@@ -56,7 +60,7 @@ export default function ProductDetailPage() {
     if (!product || product.stockQty === 0) return;
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
     if (!token) {
-      router.push(`/register/buyer?redirect=${encodeURIComponent(`/store/checkout`)}`);
+      router.push(`/register/buyer?redirect=${encodeURIComponent(`/store/${product.id}`)}`);
       return;
     }
     setAdding(true); setCartError('');
@@ -64,6 +68,10 @@ export default function ProductDetailPage() {
       await addToCart(product.id, quantity);
       router.push('/store/checkout');
     } catch (err: any) {
+      if (err?.response?.status === 401) {
+        router.push(`/register/buyer?redirect=${encodeURIComponent(`/store/${product.id}`)}`);
+        return;
+      }
       setCartError(err?.response?.data?.message || 'Failed to prepare order.');
     } finally { setAdding(false); }
   };

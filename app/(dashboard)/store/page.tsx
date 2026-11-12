@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Search, ShoppingCart, Package, Loader2, AlertCircle, ShoppingBag } from 'lucide-react';
 import { getFileUrl } from '@/lib/axios';
-import { getCategories, getProducts, addToCart, Product, ProductCategory } from '@/services/shop.service';
+import { getCategories, getProducts, getCart, addToCart, Product, ProductCategory } from '@/services/shop.service';
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { WhatsAppInquiryButton, WhatsAppFloatingWidget } from '@/components/ui/WhatsAppButton';
@@ -23,8 +23,22 @@ export default function StorePage() {
   const [addedId, setAddedId] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const refreshCartCount = async () => {
+    try {
+      const cart = await getCart();
+      const totalQty = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+      setCartCount(totalQty);
+    } catch {
+      // Ignore if unauthenticated or expired
+    }
+  };
+
   useEffect(() => {
-    setIsLoggedIn(typeof window !== 'undefined' && !!localStorage.getItem('accessToken'));
+    const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('accessToken');
+    setIsLoggedIn(hasToken);
+    if (hasToken) {
+      refreshCartCount();
+    }
   }, []);
 
   const fetchData = async () => {
@@ -52,14 +66,19 @@ export default function StorePage() {
       return;
     }
     setAddingId(product.id);
+    setError('');
     try {
       await addToCart(product.id, 1);
-      setCartCount((c) => c + 1);
+      await refreshCartCount();
       setAddedId(product.id);
       setTimeout(() => setAddedId(null), 2000);
     } catch (err: any) {
+      if (err?.response?.status === 401) {
+        router.push(`/register/buyer?redirect=${encodeURIComponent('/store')}`);
+        return;
+      }
       setError(err?.response?.data?.message || 'Failed to add to cart.');
-      setTimeout(() => setError(''), 3000);
+      setTimeout(() => setError(''), 4000);
     } finally { setAddingId(null); }
   };
 

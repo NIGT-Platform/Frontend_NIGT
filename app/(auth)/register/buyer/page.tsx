@@ -70,6 +70,9 @@ function BuyerRegistrationForm() {
       // Auto-login buyer immediately
       if (response.accessToken) {
         localStorage.setItem('accessToken', response.accessToken);
+        if (response.refreshToken) {
+          localStorage.setItem('refreshToken', response.refreshToken);
+        }
         if (response.user) {
           localStorage.setItem('user', JSON.stringify(response.user));
           localStorage.setItem('userRole', response.user.role || 'BUYER');
